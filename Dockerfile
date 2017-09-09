@@ -1,37 +1,60 @@
-FROM codeclou/docker-atlassian-base-images:jira-software-7.5.0
+FROM alpine:3.5
 
 #
-# DOCKER ENTRYPOINT
+# BASE PACKAGES
+#
+RUN apk add --no-cache \
+            bash \
+            apache2 \
+            apache2-proxy \
+            apache2-utils \
+            python \
+            py-pip && \
+            pip install shinto-cli
+
+#
+# ERROR LOG, USER
 #
 COPY docker-entrypoint.sh /work-private/docker-entrypoint.sh
-RUN chmod u+rx,g+rx,o+rx,a-w /work-private/docker-entrypoint.sh
+RUN chmod u+rx,g+rx,o+rx,a-w /work-private/docker-entrypoint.sh && \
+    ln -sf /dev/stderr /var/log/apache2/error.log && \
+    addgroup -g 10777 worker && \
+    adduser -h /work -H -D -G worker -u 10777 worker && \
+    mkdir -p /work && \
+    mkdir -p /work-private && \
+    chown -R worker:worker /work/ && \
+    chown -R worker:worker /work-private && \
+    chown -R worker:worker /var/www/logs && \
+    chown -R worker:worker /etc/apache2/ && \
+    touch /var/www/logs/error.log && chown -R worker:worker /var/www/logs/error.log && \
+    touch /var/www/logs/access.log && chown -R worker:worker /var/www/logs/access.log && \
+    chown -R worker:worker /var/log/apache2 && \
+    mkdir /run/apache2 && chown -R worker:worker /run/apache2 && \
+    sed -i -e 's/Listen 80/Listen 60750\nServerName localhost/g' /etc/apache2/httpd.conf && \
+    sed -i -e 's/AllowOverride\s*None/AllowOverride All/ig' /etc/apache2/httpd.conf && \
+    echo "LoadModule proxy_module modules/mod_proxy.so" >> /etc/apache2/httpd.conf && \
+    echo "LoadModule proxy_http_module modules/mod_proxy_http.so" >> /etc/apache2/httpd.conf && \
+    echo "LoadModule proxy_balancer_module modules/mod_proxy_balancer.so" >> /etc/apache2/httpd.conf && \
+    echo "LoadModule lbmethod_byrequests_module modules/mod_lbmethod_byrequests.so" >> /etc/apache2/httpd.conf && \
+    echo "LoadModule slotmem_shm_module modules/mod_slotmem_shm.so" >> /etc/apache2/httpd.conf && \
+    echo "Include /work-private/loadbalancer-virtual-host.conf" >> /etc/apache2/httpd.conf
 
 #
-# CONF
+# TEMPLATES
 #
-COPY dbconfig.xml /jira-home/dbconfig.xml
-COPY cluster.properties.jinja2 /work-private/cluster.properties.jinja2
+COPY loadbalancer-virtual-host.conf.jinja2 /work-private
 
 #
 # WORKDIR
 #
 WORKDIR /work
-# JIRA HTTP Port
-EXPOSE 8080
-# JIRA Cluster Sync Port
-EXPOSE 40001
-# JIRA Cluster EHCache Multicast Port - see: https://forums.rancher.com/t/solved-problems-multicast-ehcache/1507/7
-EXPOSE 4446
+EXPOSE 9980
 
 #
 # RUN
 #
 USER worker
-# CONFIG VARS (jinja2)
-ENV NODE_NUMBER 1
-# INTERNAL CONFIG
-ENV JIRA_HOME /jira-home
+ENV NODES 1
 VOLUME ["/work"]
-VOLUME ["/jira-shared-home"]
 ENTRYPOINT ["/work-private/docker-entrypoint.sh"]
-CMD ["/jira/atlassian-jira-software-latest-standalone/bin/catalina.sh", "run"]
+CMD ["httpd", "-DFOREGROUND"]
