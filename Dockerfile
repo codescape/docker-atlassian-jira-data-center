@@ -1,4 +1,4 @@
-FROM codeclou/docker-atlassian-base-images:jira-software-7.3.3
+FROM codeclou/docker-atlassian-base-images:jira-software-7.5.0
 
 #
 # DOCKER ENTRYPOINT
