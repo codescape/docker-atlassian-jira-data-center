@@ -1,4 +1,4 @@
-FROM codeclou/docker-atlassian-base-images:jira-software-7.5.0
+FROM codeclou/docker-atlassian-base-images:jira-software-7.6.0
 
 #
 # DOCKER ENTRYPOINT
@@ -35,4 +35,3 @@ VOLUME ["/work"]
 VOLUME ["/jira-shared-home"]
 ENTRYPOINT ["/work-private/docker-entrypoint.sh"]
 CMD ["/jira/atlassian-jira-software-latest-standalone/bin/catalina.sh", "run"]
-

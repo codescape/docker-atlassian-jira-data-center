@@ -5,7 +5,7 @@
   <database-type>postgres72</database-type>
   <schema-name>public</schema-name>
   <jdbc-datasource>
-    <url>jdbc:postgresql://jira-cluster-750-db/jira</url>
+    <url>jdbc:postgresql://jira-cluster-760-db/jira</url>
     <driver-class>org.postgresql.Driver</driver-class>
     <username>jira</username>
     <password>jira</password>
