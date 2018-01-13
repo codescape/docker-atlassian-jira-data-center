@@ -1,1 +1,1 @@
-# jiranode-7.6.0
+# jiranode-7.7.0
