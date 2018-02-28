@@ -1,1 +1,1 @@
-# loadbalancer-7.7.0
+# loadbalancer-7.8.0
