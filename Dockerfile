@@ -40,6 +40,8 @@ RUN chmod u+rx,g+rx,o+rx,a-w /work-private/docker-entrypoint.sh && \
 # TEMPLATES
 #
 COPY loadbalancer-virtual-host.conf.jinja2 /work-private
+RUN chmod u+rx,g+rx,o+rx,a-w loadbalancer-virtual-host.conf.jinja2
+
 
 #
 # WORKDIR
