@@ -39,8 +39,9 @@ RUN chmod u+rx,g+rx,o+rx,a-w /work-private/docker-entrypoint.sh && \
 #
 # TEMPLATES
 #
-COPY loadbalancer-virtual-host.conf.jinja2 /work-private
-RUN chmod u+rx,g+rx,o+rx,a-w /work-private/loadbalancer-virtual-host.conf.jinja2
+COPY loadbalancer-virtual-host.conf.jinja2 /work-private/loadbalancer-virtual-host.conf.jinja2
+COPY document-root /work-private/document-root
+RUN chown -R worker /work-private/* && chmod -R a+x /work-private
 
 
 #
